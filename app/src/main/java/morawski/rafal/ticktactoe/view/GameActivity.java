@@ -17,14 +17,22 @@ public class GameActivity extends AppCompatActivity implements Observer{
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_game);
 
-        initDataBinding();
+        promptForPlayers();
     }
 
-    private void initDataBinding() {
+    public void promptForPlayers() {
+        GameBeginDialog dialog = GameBeginDialog.getInstance(this);
+        dialog.show(getSupportFragmentManager(), "game_begin_tag");
+    }
+
+    public void onPlayersSet(String player1Name, String player2Name) {
+        initDataBinding(player1Name, player2Name);
+    }
+
+    private void initDataBinding(String player1Name, String player2Name) {
         ActivityGameBinding activityGameBinding = DataBindingUtil.setContentView(this, R.layout.activity_game);
-        GameViewModel gameViewModel = new GameViewModel("Zenek", "Karol");
+        GameViewModel gameViewModel = new GameViewModel(player1Name, player2Name);
         gameViewModel.addObserver(this);
         activityGameBinding.setGameViewModel(gameViewModel);
     }
@@ -32,5 +40,7 @@ public class GameActivity extends AppCompatActivity implements Observer{
     @Override
     public void update(Observable observable, Object o) {
         Log.i("TickTacToe", "Player " + o + " won!");
+        GameEndDialog gameEndDialog = GameEndDialog.getInstance(this, (String) o);
+        gameEndDialog.show(getSupportFragmentManager(), "game_end_tag");
     }
 }
